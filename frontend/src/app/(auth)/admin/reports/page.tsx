@@ -1,0 +1,223 @@
+
+"use client";
+
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, Download, PieChart, Users, Calendar as CalendarIcon, CalendarRange } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+const reports = [
+    { title: "Monthly Salary Statement", description: "Detailed report of all salaries paid for a selected month.", icon: <FileText className="h-8 w-8 text-primary" /> },
+    { title: "Department-wise Pay", description: "Breakdown of salary expenses across different departments.", icon: <PieChart className="h-8 w-8 text-primary" /> },
+    { title: "Yearly Financial Summary", description: "An overview of payroll expenses for the entire financial year.", icon: <CalendarIcon className="h-8 w-8 text-primary" /> },
+];
+
+const departments = ["All", "Administration", "Computer Science", "ECE", "EE", "CIVIL", "Mechanical", "MBA", "MCA", "Placement"];
+
+
+function DepartmentReportCard({ title, description, icon }: { title: string, description: string, icon: React.ReactNode }) {
+    return (
+        <Card className="flex flex-col">
+            <CardHeader className="flex-1">
+                <div className="flex items-start gap-4">
+                    <div className="bg-primary/10 p-3 rounded-lg">
+                        {icon}
+                    </div>
+                    <div>
+                        <CardTitle className="text-lg">{title}</CardTitle>
+                        <CardDescription className="mt-2">{description}</CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                 <Dialog>
+                    <DialogTrigger asChild>
+                        <Button className="w-full">
+                            <Download className="mr-2 h-4 w-4" />
+                            Generate & Download
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Generate {title}</DialogTitle>
+                            <DialogDescription>
+                                Select a department for your report.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                             <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="department" className="text-right">
+                                    Department
+                                </Label>
+                                <Select>
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue placeholder="Select a department" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {departments.map(dep => <SelectItem key={dep} value={dep.toLowerCase().replace(' ', '-')}>{dep}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit">
+                                <Download className="mr-2 h-4 w-4" />
+                                Generate & Download
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </CardContent>
+        </Card>
+    )
+}
+
+function DateRangeReportCard() {
+    const [startDate, setStartDate] = React.useState<Date | undefined>();
+    const [endDate, setEndDate] = React.useState<Date | undefined>();
+
+    return (
+        <Card className="flex flex-col">
+            <CardHeader className="flex-1">
+                <div className="flex items-start gap-4">
+                    <div className="bg-primary/10 p-3 rounded-lg">
+                        <CalendarRange className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-lg">Date Range Based Report</CardTitle>
+                        <CardDescription className="mt-2">Generate a custom report for a specific period.</CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button className="w-full">
+                            <Download className="mr-2 h-4 w-4" />
+                            Generate & Download
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Generate Date Range Report</DialogTitle>
+                            <DialogDescription>
+                                Select a start and end date for your report.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="start-date" className="text-right">
+                                    Start Date
+                                </Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            id="start-date"
+                                            variant={"outline"}
+                                            className={cn(
+                                                "col-span-3 justify-start text-left font-normal",
+                                                !startDate && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode="single"
+                                            selected={startDate}
+                                            onSelect={setStartDate}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="end-date" className="text-right">
+                                    End Date
+                                </Label>
+                                 <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            id="end-date"
+                                            variant={"outline"}
+                                            className={cn(
+                                                "col-span-3 justify-start text-left font-normal",
+                                                !endDate && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode="single"
+                                            selected={endDate}
+                                            onSelect={setEndDate}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit">
+                                <Download className="mr-2 h-4 w-4" />
+                                Generate & Download
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </CardContent>
+        </Card>
+    );
+}
+
+
+export default function AdminReportsPage() {
+  return (
+    <div className="grid gap-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>Reports</CardTitle>
+                <CardDescription>Generate and download various organizational reports.</CardDescription>
+            </CardHeader>
+        </Card>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reports.map((report, index) => (
+               <DepartmentReportCard key={index} {...report} />
+            ))}
+            <DateRangeReportCard />
+        </div>
+    </div>
+  );
+}
