@@ -42,4 +42,4 @@ Key features include:
    ```
 
 4. Open your browser and visit:  
-   [http://localhost:3000](http://localhost:3000)
+   [http://localhost:9000](http://localhost:9000)
