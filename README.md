@@ -15,7 +15,7 @@ Key features include:
 - Responsive UI with accessibility options like font size control.
 
 ## 🚀 Tech Stack
-- **Frontend:** Next.js
+- **Frontend:** Next.js (TypeScript)
 - **Backend:** Spring Boot
 - **Database:** PostgreSQL
 
