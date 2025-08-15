@@ -25,6 +25,7 @@ public class AuthController {
     public Map<String, String> login(@RequestBody LoginRequest authRequest) {
         System.out.println("Login attempt with username: " + authRequest.getUsername());
         System.out.println("Password received: " + authRequest.getPassword());
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getUsername(),
@@ -32,10 +33,11 @@ public class AuthController {
                 )
         );
 
-
         UserDetails user = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(user);
-        String role = user.getAuthorities().iterator().next().getAuthority();
+
+        String rawRole = user.getAuthorities().iterator().next().getAuthority();
+        String role = rawRole.startsWith("ROLE_") ? rawRole.substring(5) : rawRole;
 
         return Map.of("token", token, "role", role);
     }
