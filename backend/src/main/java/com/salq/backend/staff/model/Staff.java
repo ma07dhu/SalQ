@@ -1,4 +1,4 @@
-package com.salq.backend.dbTable;
+package com.salq.backend.staff.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
