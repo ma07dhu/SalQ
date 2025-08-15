@@ -21,24 +21,32 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/login")
+   @PostMapping("/login")
     public Map<String, String> login(@RequestBody LoginRequest authRequest) {
         System.out.println("Login attempt with username: " + authRequest.getUsername());
-        System.out.println("Password received: " + authRequest.getPassword());
-
-        Authentication authentication = authenticationManager.authenticate(
+        
+        try {
+            Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        authRequest.getUsername(),
-                        authRequest.getPassword()
+                    authRequest.getUsername(),
+                    authRequest.getPassword()
                 )
-        );
-
-        UserDetails user = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(user);
-
-        String rawRole = user.getAuthorities().iterator().next().getAuthority();
-        String role = rawRole.startsWith("ROLE_") ? rawRole.substring(5) : rawRole;
-
-        return Map.of("token", token, "role", role);
+            );
+            
+            UserDetails user = (UserDetails) authentication.getPrincipal();
+            System.out.println("User authenticated: " + user.getUsername());
+            System.out.println("User roles: " + user.getAuthorities());
+            
+            String token = jwtUtil.generateToken(user);
+            String role = user.getAuthorities().stream()
+                    .findFirst()
+                    .map(auth -> auth.getAuthority().replace("ROLE_", "").toLowerCase())
+                    .orElse("user");
+                    
+            return Map.of("token", token, "role", role);
+        } catch (Exception e) {
+            System.out.println("Authentication failed: " + e.getMessage());
+            throw e;
+        }
     }
 }
