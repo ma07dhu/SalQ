@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRouter } from 'next/navigation';
@@ -8,35 +7,58 @@ export type UserRole = 'admin' | 'hr' | 'employee';
 
 interface AuthContextType {
   role: UserRole | null;
-  login: (role: UserRole) => void;
+  token: string | null;
+  login: (role: UserRole, token: string) => void;
   logout: () => void;
+  getToken: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole') as UserRole;
-    if (storedRole) {
+    const storedToken = localStorage.getItem('jwtToken');
+    if (storedRole && storedToken) {
       setRole(storedRole);
+      setToken(storedToken);
     }
   }, []);
 
-  const login = (userRole: UserRole) => {
+  const login = (userRole: UserRole, userToken: string) => {
     setRole(userRole);
+    setToken(userToken);
     localStorage.setItem('userRole', userRole);
+    localStorage.setItem('jwtToken', userToken);
   };
 
   const logout = () => {
     setRole(null);
+    setToken(null);
     localStorage.removeItem('userRole');
+    localStorage.removeItem('jwtToken');
+    document.cookie = "token=; Max-Age=0; path=/"; // Clear cookie if stored there
     router.push('/login');
   };
 
-  const value = useMemo(() => ({ role, login, logout }), [role]);
+  const getToken = () => {
+    return token || localStorage.getItem('jwtToken');
+  };
+
+  const value = useMemo(
+    () => ({ 
+      role, 
+      token,
+      login, 
+      logout,
+      getToken 
+    }), 
+    [role, token]
+  );
 
   return (
     <AuthContext.Provider value={value}>

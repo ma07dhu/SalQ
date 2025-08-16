@@ -35,6 +35,7 @@ export function LoginForm() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        
 
         try {
             const res = await fetch("http://localhost:8080/api/auth/login", {
@@ -43,20 +44,16 @@ export function LoginForm() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    username: email, // Spring expects "username"
+                    username: email,
                     password: password,
                 }),
             });
 
             if (res.ok) {
                 const data = await res.json(); // { token, role }
-
-                // ✅ Save JWT token + role in browser storage (client only)
-                localStorage.setItem("jwtToken", data.token);
-                localStorage.setItem("role", data.role);
-
-                // Update global auth context
-                login(data.role);
+                
+                // Update auth context with both role and token
+                login(data.role, data.token);
 
                 // Redirect user based on role or common dashboard
                 router.push("/dashboard");
