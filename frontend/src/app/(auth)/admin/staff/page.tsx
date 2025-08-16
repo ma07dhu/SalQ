@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -50,7 +49,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
+interface ImportResult {
+    successCount: number;
+    errorCount: number;
+    errors: string[];
+}
 
 const staffList = [
   { id: "EMP001", name: "Aarav Sharma", department: "Engineering", role: "Sr. Software Engineer", status: "Active", joinedDate: "2020-01-15", basePay: 75000, bankAccount: "1234567890", email: "aarav.sharma@example.com", mobile: "9876543210" },
@@ -247,7 +252,20 @@ export default function StaffManagementPage() {
     const [filteredStaff, setFilteredStaff] = React.useState(staffList);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState("all");
+    const [file, setFile] = React.useState<File | null>(null);
+    const [importResult, setImportResult] = React.useState<ImportResult | null>(null);
+    const [isImporting, setIsImporting] = React.useState(false);
+    const [importDialogOpen, setImportDialogOpen] = React.useState(false);
+    const [importDialogTitle, setImportDialogTitle] = React.useState("");
+    const [importDialogMessage, setImportDialogMessage] = React.useState<string | React.ReactNode>("");
+    const { getToken } = useAuth();
 
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setFile(event.target.files[0]);
+        }
+    };
+    
     const handleUpdateStaff = (updatedStaff: Staff) => {
         const newMasterList = masterStaffList.map(s => s.id === updatedStaff.id ? updatedStaff : s);
         // In a real app, you'd update masterStaffList state here, e.g. `setMasterStaffList(newMasterList)`
@@ -255,7 +273,103 @@ export default function StaffManagementPage() {
         const newFilteredList = filteredStaff.map(s => s.id === updatedStaff.id ? updatedStaff : s);
         setFilteredStaff(newFilteredList);
     }
+    const handleBulkImport = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!file) {
+            setImportDialogTitle("Error");
+            setImportDialogMessage("Please select a file to upload");
+            setImportDialogOpen(true);
+            return;
+        }
     
+        const token = getToken();
+        if (!token) {
+            setImportDialogTitle("Authentication Required");
+            setImportDialogMessage("Please log in again to continue");
+            setImportDialogOpen(true);
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append('file', file);
+        setIsImporting(true);
+        setImportResult(null);
+    
+        try {
+            const response = await fetch('http://localhost:8080/api/staff/import', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+    
+            const result = await response.json();
+            
+            // Close the import dialog first
+            const dialog = document.getElementById('import-dialog')?.closest('[role="dialog"]') as HTMLElement;
+            if (dialog) {
+                const closeButton = dialog.querySelector('button[data-radix-dropdown-menu-trigger]') as HTMLButtonElement;
+                closeButton?.click();
+            }
+    
+            // Then show the result
+            if (!response.ok) {
+                const errorMessage = result.message || 'Failed to import staff';
+                const errorDetails = result.errors ? (
+                    <div className="mt-2 text-sm">
+                        <p>{errorMessage}</p>
+                        <div className="mt-2 p-2 bg-red-50 rounded-md">
+                            <ul className="list-disc pl-5 space-y-1">
+                                {result.errors.map((error: string, index: number) => (
+                                    <li key={index}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                ) : null;
+                
+                setImportDialogTitle("Import Failed");
+                setImportDialogMessage(errorDetails || errorMessage);
+                setImportDialogOpen(true);
+                return;
+            }
+    
+            setImportResult(result);
+            if (result.errorCount > 0) {
+                const message = (
+                    <div className="space-y-2">
+                        <p>Successfully imported {result.successCount} staff members.</p>
+                        <div className="mt-2 p-2 bg-yellow-50 rounded-md">
+                            <p className="font-medium">Encountered {result.errorCount} error(s):</p>
+                            <ul className="list-disc pl-5 mt-1 space-y-1">
+                                {result.errors.map((error: string, index: number) => (
+                                    <li key={index}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                );
+                setImportDialogTitle("Import Completed with Warnings");
+                setImportDialogMessage(message);
+            } else {
+                setImportDialogTitle("Import Successful");
+                setImportDialogMessage(`Successfully imported ${result.successCount} staff members.`);
+            }
+            setImportDialogOpen(true);
+            
+        } catch (error) {
+            console.error('Error importing staff:', error);
+            setImportDialogTitle("Error");
+            setImportDialogMessage(`Failed to import staff: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            setImportDialogOpen(true);
+        } finally {
+            setIsImporting(false);
+            setFile(null);
+        }
+    };
+
     React.useEffect(() => {
         let newFilteredStaff = masterStaffList;
 
@@ -310,7 +424,7 @@ export default function StaffManagementPage() {
                     <DialogTrigger asChild>
                         <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Bulk Import</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[480px]">
+                    <DialogContent id="import-dialog" className="sm:max-w-[480px]">
                         <DialogHeader>
                             <DialogTitle>Bulk Import Staff</DialogTitle>
                             <DialogDescription>
@@ -320,7 +434,12 @@ export default function StaffManagementPage() {
                         <div className="grid gap-4 py-4">
                             <div className="grid w-full max-w-sm items-center gap-1.5">
                                 <Label htmlFor="file">Upload File</Label>
-                                <Input id="file" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                                <Input 
+                                    id="file" 
+                                    type="file" 
+                                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
+                                    onChange={handleFileChange}
+                                />
                             </div>
                             <div className="text-sm text-muted-foreground">
                                 Make sure your file has columns for Staff ID, Name, Department, and Role.
@@ -331,10 +450,30 @@ export default function StaffManagementPage() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="submit" className="w-full sm:w-auto">
+                            <Button 
+                                type="submit" 
+                                className="w-full sm:w-auto"
+                                onClick={async (e) => {
+                                    await handleBulkImport(e);
+                                }}
+                            >
                                 <Upload className="mr-2 h-4 w-4" />
                                 Upload and Import
                             </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                {/* Import Result Dialog */}
+                <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{importDialogTitle}</DialogTitle>
+                        </DialogHeader>
+                        <div className="py-4">
+                            {importDialogMessage}
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={() => setImportDialogOpen(false)}>Close</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -470,7 +609,3 @@ export default function StaffManagementPage() {
     </Card>
   );
 }
-
-
-    
-    
