@@ -33,9 +33,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
-                // .requestMatchers("/api/admin/**").authenticated()
-                // .requestMatchers("/api/hr/**").authenticated()
-                // .requestMatchers("/api/staff/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/hr/**").hasRole("HR")
                 .requestMatchers("/api/staff/**").hasRole("STAFF")
