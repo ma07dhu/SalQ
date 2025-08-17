@@ -2,9 +2,11 @@ package com.salq.backend.auth.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "users") // match your actual table name
+@Table(name = "users")
 public class User {
 
     @Id
@@ -27,7 +29,18 @@ public class User {
     @Column(name = "last_password_change")
     private LocalDateTime lastPasswordChange;
 
-    // Getters & Setters
+    // THIS IS THE KEY PART: Add roles relationship
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles", // join table
+        joinColumns = @JoinColumn(name = "user_id"), // foreign key to users
+        inverseJoinColumns = @JoinColumn(name = "role_id") // foreign key to roles
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
+
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 

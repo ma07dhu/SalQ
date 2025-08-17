@@ -23,6 +23,7 @@ export function LoginForm() {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [isClient, setIsClient] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         setIsClient(true);
@@ -44,32 +45,35 @@ export function LoginForm() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    username: email,
+                    email: email,
                     password: password,
+                    role: role
                 }),
             });
 
             if (res.ok) {
-                const data = await res.json(); // { token, role }
-                
-                // Update auth context with both role and token
+                const data = await res.json();
                 login(data.role, data.token);
-
-                // Redirect user based on role or common dashboard
                 router.push("/dashboard");
             } else {
-                alert("Invalid credentials");
+                const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || "Invalid credentials");
             }
         } catch (err) {
             console.error("Login error:", err);
-            alert("Something went wrong during login.");
+            setError("Something went wrong during login. Please try again.");
         }
     };
 
     return (
         <form onSubmit={handleLogin}>
             <Card className="border-none shadow-none">
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 pt-4">
+                    {error && (
+                        <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
                     {/* Role select */}
                     <div className="space-y-2">
                         <Label htmlFor="role">Role</Label>
@@ -104,12 +108,6 @@ export function LoginForm() {
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <Label htmlFor="password">Password</Label>
-                            <Link
-                                href="#"
-                                className="text-sm text-primary hover:underline"
-                            >
-                                Forgot password?
-                            </Link>
                         </div>
                         <Input
                             id="password"

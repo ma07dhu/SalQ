@@ -1,17 +1,24 @@
 package com.salq.backend.auth.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-@Data
+
 @Entity
 @Table(name="roles")
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long role_id;
+    @Column(name = "role_id")
+    private Long roleId;
 
-    private String role_name;
+    @Column(name = "role_name")
+    private String roleName;
 
+    // Getters & Setters...
+    public Long getRoleId() { return roleId; }
+    public void setRoleId(Long roleId) { this.roleId = roleId; }
+
+    public String getRoleName() { return roleName; }
+    public void setRoleName(String roleName) { this.roleName = roleName; }
 }

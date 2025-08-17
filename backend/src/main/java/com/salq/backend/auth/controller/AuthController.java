@@ -1,52 +1,29 @@
 package com.salq.backend.auth.controller;
-import com.salq.backend.auth.model.LoginRequest;
+import com.salq.backend.auth.dto.LoginRequest;
+import com.salq.backend.auth.dto.LoginResponse;
+import com.salq.backend.auth.service.AuthService;
 
-import com.salq.backend.config.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9002")
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final AuthService authService;
 
-   @PostMapping("/login")
-    public Map<String, String> login(@RequestBody LoginRequest authRequest) {
-        System.out.println("Login attempt with username: " + authRequest.getUsername());
-        
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    authRequest.getUsername(),
-                    authRequest.getPassword()
-                )
-            );
-            
-            UserDetails user = (UserDetails) authentication.getPrincipal();
-            System.out.println("User authenticated: " + user.getUsername());
-            System.out.println("User roles: " + user.getAuthorities());
-            
-            String token = jwtUtil.generateToken(user);
-            String role = user.getAuthorities().stream()
-                    .findFirst()
-                    .map(auth -> auth.getAuthority().replace("ROLE_", "").toLowerCase())
-                    .orElse("user");
-                    
-            return Map.of("token", token, "role", role);
-        } catch (Exception e) {
-            System.out.println("Authentication failed: " + e.getMessage());
-            throw e;
-        }
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+        System.out.println("IN post /login route");
+        LoginResponse response = authService.authenticate(loginRequest);
+        System.out.println("Response received");
+        return ResponseEntity.ok(response);
+    }
+
 }

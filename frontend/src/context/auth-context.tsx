@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const getToken = () => {
-    return token || localStorage.getItem('jwtToken');
+    return localStorage.getItem('jwtToken');
   };
 
   const value = useMemo(
