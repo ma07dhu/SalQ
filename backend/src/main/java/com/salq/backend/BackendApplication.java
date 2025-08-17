@@ -11,9 +11,6 @@ public class BackendApplication {
         SpringApplication.run(BackendApplication.class, args);
         System.out.println("SalQ Application Started");
 
-                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-                System.out.println(encoder.encode("adminpass"));
-                System.out.println(encoder.encode("hrpass"));
-                System.out.println(encoder.encode("employeepass"));
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     }
 }
