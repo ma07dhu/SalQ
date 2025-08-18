@@ -5,12 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public class LoginRequest {
-    // private String username;
-    // private String password;
-
-    // // Default constructor
-    // public LoginRequest() {}
-
  
 
     @NotNull

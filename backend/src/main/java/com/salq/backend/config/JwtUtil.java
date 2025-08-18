@@ -1,3 +1,77 @@
+// package com.salq.backend.config;
+
+// import io.jsonwebtoken.Claims;
+// import io.jsonwebtoken.JwtException;
+// import io.jsonwebtoken.Jwts;
+// import io.jsonwebtoken.SignatureAlgorithm;
+// import io.jsonwebtoken.security.Keys;
+// import org.springframework.stereotype.Service;
+
+// import javax.crypto.SecretKey;
+// import java.nio.charset.StandardCharsets;
+// import java.security.Key;
+// import java.util.Date;
+// import java.util.HashMap;
+// import java.util.Map;
+
+// import com.salq.backend.auth.model.User;
+
+// @Service
+// public class JwtUtil {
+
+//     private final String SECRET_KEY =
+//         "DarimaduguVenkataKavyaSaiKanchipuramPriyadarshiniKuppachiSaiMadhuVarshithaSarvepalliMalaReshmaDevi";
+
+//     private Key getSigningKey() {
+//         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
+//         return Keys.hmacShaKeyFor(keyBytes); // SecretKey
+//     }
+
+//     // Generate token with ONLY the requested role
+//     public String generateToken(User user, String requestedRoleUpper) {
+//         Map<String, Object> claims = new HashMap<>();
+//         claims.put("role", requestedRoleUpper);
+//         claims.put("userId", user.getUserId());
+
+//         return Jwts.builder()
+//                 .setClaims(claims)
+//                 .setSubject(user.getEmail())
+//                 .setIssuedAt(new Date())
+//                 .setExpiration(new Date(System.currentTimeMillis() + (1000L * 60 * 60))) // 1 hour
+//                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+//                 .compact();
+//     }
+
+//     private Claims extractAllClaims(String token) {
+//         try {
+//             return Jwts.parser()
+//                     .verifyWith((SecretKey) getSigningKey())
+//                     .build()
+//                     .parseSignedClaims(token)
+//                     .getPayload();
+//         } catch (JwtException | IllegalArgumentException e) {
+//             throw new RuntimeException("Invalid JWT", e);
+//         }
+//     }
+
+//     public String extractUsername(String token) {
+//         return extractAllClaims(token).getSubject();
+//     }
+
+//     public String extractRole(String token) {
+//         return extractAllClaims(token).get("role", String.class);
+//     }
+
+//     public boolean isTokenExpired(String token) {
+//         return extractAllClaims(token).getExpiration().before(new Date());
+//     }
+
+//     public boolean validateToken(String token, String username) {
+//         return username.equals(extractUsername(token)) && !isTokenExpired(token);
+//     }
+// }
+
+
 package com.salq.backend.config;
 
 import io.jsonwebtoken.Claims;
@@ -7,9 +81,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import com.salq.backend.auth.model.Role;
-
 import com.salq.backend.auth.model.User;
 
 import javax.crypto.SecretKey;
@@ -21,34 +93,44 @@ import java.util.stream.Collectors;
 @Service
 public class JwtUtil {
 
+    // NOTE: keep at least 32 characters for HS256
     private final String SECRET_KEY = "DarimaduguVenkataKavyaSaiKanchipuramPriyadarshiniKuppachiSaiMadhuVarshithaSarvepalliMalaReshmaDevi";
 
-
+    /**
+     * Converts the raw string to a proper HMAC-SHA key.
+     */
     private Key getSigningKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-   public String generateToken(User user) {
+    /**
+     * Generates a JWT based on user's email, roles, and id.
+     */
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()));
         claims.put("userId", user.getUserId());
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 3)) // 3 hours
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // ✅ Consistent
                 .compact();
     }
 
+    /**
+     * Extracts all claims by using the same signing key for verification.
+     */
     private Claims extractAllClaims(String token) {
         try {
             return Jwts.parser()
-                .verifyWith((SecretKey) getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                    .verifyWith((SecretKey) getSigningKey()) // ✅ Consistent
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (JwtException | IllegalArgumentException e) {
             throw new RuntimeException("Invalid JWT", e);
         }
@@ -71,3 +153,4 @@ public class JwtUtil {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 }
+

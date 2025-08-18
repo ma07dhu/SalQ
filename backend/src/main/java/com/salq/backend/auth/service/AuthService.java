@@ -32,15 +32,17 @@ public class AuthService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid password");
         }
-
+        String requestedRole = loginRequest.getRole().toUpperCase();
         boolean hasRole = user.getRoles().stream()
-            .anyMatch(role -> role.getRoleName().equalsIgnoreCase(loginRequest.getRole()));
+                .anyMatch(r -> r.getRoleName().equalsIgnoreCase(requestedRole));
 
+        
         if (!hasRole) {
             throw new AccessDeniedException("Role not assigned to user");
         }
 
         String token = jwtUtil.generateToken(user);
+
         return new LoginResponse(token, loginRequest.getRole());
     }
 }
