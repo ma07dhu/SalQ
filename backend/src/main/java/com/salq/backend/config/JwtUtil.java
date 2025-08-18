@@ -93,20 +93,12 @@ import java.util.stream.Collectors;
 @Service
 public class JwtUtil {
 
-    // NOTE: keep at least 32 characters for HS256
     private final String SECRET_KEY = "DarimaduguVenkataKavyaSaiKanchipuramPriyadarshiniKuppachiSaiMadhuVarshithaSarvepalliMalaReshmaDevi";
 
-    /**
-     * Converts the raw string to a proper HMAC-SHA key.
-     */
     private Key getSigningKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
-    /**
-     * Generates a JWT based on user's email, roles, and id.
-     */
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()));
@@ -121,9 +113,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    /**
-     * Extracts all claims by using the same signing key for verification.
-     */
     private Claims extractAllClaims(String token) {
         try {
             return Jwts.parser()

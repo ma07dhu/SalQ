@@ -50,6 +50,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
+import ProtectedRoute from "@/components/protected-route";
 
 interface ImportResult {
     successCount: number;
@@ -297,7 +298,7 @@ export default function StaffManagementPage() {
         setImportResult(null);
     
         try {
-            const response = await fetch('http://localhost:8080/api/staff/import', {
+            const response = await fetch('http://localhost:8080/api/admin/import', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -392,6 +393,7 @@ export default function StaffManagementPage() {
 
 
   return (
+    <ProtectedRoute allowedRoles={["admin"]}>
     <Card>
       <CardHeader>
         <CardTitle>Staff Management</CardTitle>
@@ -607,5 +609,7 @@ export default function StaffManagementPage() {
         </div>
       </CardContent>
     </Card>
+    
+    </ProtectedRoute>
   );
 }

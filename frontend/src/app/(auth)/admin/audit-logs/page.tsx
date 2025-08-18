@@ -30,6 +30,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from "date-fns";
+import ProtectedRoute from "@/components/protected-route";
 
 
 const auditLogs = [
@@ -44,6 +45,7 @@ const auditLogs = [
 export default function AuditLogsPage() {
     const [date, setDate] = React.useState<Date>()
   return (
+    <ProtectedRoute allowedRoles={["admin"]}>
     <Card>
       <CardHeader>
         <CardTitle>Audit Logs</CardTitle>
@@ -109,5 +111,6 @@ export default function AuditLogsPage() {
         </div>
       </CardContent>
     </Card>
+    </ProtectedRoute>
   );
 }
