@@ -1,4 +1,4 @@
-package com.salq.backend.staff.service;
+package com.salq.backend.admin.service;
 
 import com.opencsv.CSVReader;
 import com.salq.backend.staff.model.Staff;

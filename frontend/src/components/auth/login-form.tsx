@@ -36,7 +36,6 @@ export function LoginForm() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        
 
         try {
             const res = await fetch("http://localhost:8080/api/auth/login", {
@@ -51,6 +50,7 @@ export function LoginForm() {
                 }),
             });
 
+            console.log(res);
             if (res.ok) {
                 const data = await res.json();
                 login(data.role, data.token);

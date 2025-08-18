@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { FilePlus2, FileText, ShieldCheck, Users, IndianRupee } from "lucide-react";
 import Link from 'next/link';
+import ProtectedRoute from "@/components/protected-route";
 
 // Your existing sample summary cards
 const summaryCards = [
@@ -55,90 +56,93 @@ export default function AdminDashboard() {
     }, []);
 
     return (
-        <div className="flex flex-col gap-6">
-            {/* ✅ Show backend auth confirmation if present */}
-            {backendMessage && (
-                <div className="p-4 bg-green-100 text-green-800 rounded">
-                    {backendMessage}
+        
+        <ProtectedRoute allowedRoles={["admin"]}>
+            <div className="flex flex-col gap-6">
+                {/* ✅ Show backend auth confirmation if present */}
+                {backendMessage && (
+                    <div className="p-4 bg-green-100 text-green-800 rounded">
+                        {backendMessage}
+                    </div>
+                )}
+
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {summaryCards.map((card, index) => (
+                        <Card key={index}>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                                {card.icon}
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{card.value}</div>
+                                {card.description && (
+                                    <p className="text-xs text-muted-foreground">{card.description}</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
-            )}
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {summaryCards.map((card, index) => (
-                    <Card key={index}>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                            {card.icon}
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{card.value}</div>
-                            {card.description && (
-                                <p className="text-xs text-muted-foreground">{card.description}</p>
-                            )}
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                        <CardDescription>An overview of recent actions in the system.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Action</TableHead>
-                                    <TableHead>Details</TableHead>
-                                    <TableHead className="text-right">Time</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {recentActivities.map((activity, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="font-medium">{activity.user}</TableCell>
-                                        <TableCell>{activity.action}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{activity.details}</TableCell>
-                                        <TableCell className="text-right text-muted-foreground">{activity.time}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                <div className="flex flex-col gap-6">
-                    <Card>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <Card className="lg:col-span-2">
                         <CardHeader>
-                            <CardTitle>Quick Actions</CardTitle>
+                            <CardTitle>Recent Activity</CardTitle>
+                            <CardDescription>An overview of recent actions in the system.</CardDescription>
                         </CardHeader>
-                        <CardContent className="grid gap-2">
-                            <Button asChild>
-                                <Link href="/admin/staff"><FilePlus2 className="mr-2 h-4 w-4" /> Add New Staff</Link>
-                            </Button>
-                            <Button asChild variant="secondary">
-                                <Link href="/admin/audit-logs"><ShieldCheck className="mr-2 h-4 w-4" /> View Audit Logs</Link>
-                            </Button>
-                            <Button asChild variant="secondary">
-                                <Link href="/admin/reports"><FileText className="mr-2 h-4 w-4" /> Generate Report</Link>
-                            </Button>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Action</TableHead>
+                                        <TableHead>Details</TableHead>
+                                        <TableHead className="text-right">Time</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {recentActivities.map((activity, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell className="font-medium">{activity.user}</TableCell>
+                                            <TableCell>{activity.action}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{activity.details}</TableCell>
+                                            <TableCell className="text-right text-muted-foreground">{activity.time}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardDescription>Next Salary Processing</CardDescription>
-                            <CardTitle className="text-3xl">July 5, 2024</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-xs text-muted-foreground">for the month of June</div>
-                        </CardContent>
-                    </Card>
+                    <div className="flex flex-col gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Quick Actions</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid gap-2">
+                                <Button asChild>
+                                    <Link href="/admin/staff"><FilePlus2 className="mr-2 h-4 w-4" /> Add New Staff</Link>
+                                </Button>
+                                <Button asChild variant="secondary">
+                                    <Link href="/admin/audit-logs"><ShieldCheck className="mr-2 h-4 w-4" /> View Audit Logs</Link>
+                                </Button>
+                                <Button asChild variant="secondary">
+                                    <Link href="/admin/reports"><FileText className="mr-2 h-4 w-4" /> Generate Report</Link>
+                                </Button>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardDescription>Next Salary Processing</CardDescription>
+                                <CardTitle className="text-3xl">July 5, 2024</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-xs text-muted-foreground">for the month of June</div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
-        </div>
+        </ProtectedRoute>
     );
 }
