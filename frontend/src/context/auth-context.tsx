@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (role: UserRole, token: string) => void;
   logout: () => void;
   getToken: () => string | null;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(storedRole);
       setToken(storedToken);
     }
+    setLoading(false);
   }, []);
 
   const login = (userRole: UserRole, userToken: string) => {
@@ -34,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(userToken);
     localStorage.setItem('userRole', userRole);
     localStorage.setItem('jwtToken', userToken);
+    router.push(`/${userRole}/dashboard`);
   };
 
   const logout = () => {
@@ -46,8 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const getToken = () => {
-    return localStorage.getItem('jwtToken');
+      return token;
   };
+
 
   const value = useMemo(
     () => ({ 
@@ -55,9 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       login, 
       logout,
-      getToken 
+      getToken,
+      isLoading: loading,
     }), 
-    [role, token]
+    [role, token,loading]
   );
 
   return (
