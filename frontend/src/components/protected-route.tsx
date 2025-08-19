@@ -10,16 +10,22 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
-  const { role, token } = useAuth();
+  const { role, token,isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) {
-      router.push("/login"); // not logged in
-    } else if (role && !allowedRoles.includes(role)) {
-      router.push("/unauthorized"); // logged in but wrong role
+    if (!isLoading){
+     if (!token) {
+          router.push("/login"); // not logged in
+     } else if (role && !allowedRoles.includes(role)) {
+         router.push("/unauthorized"); // logged in but wrong role
+        }
     }
-  }, [role, token, router, allowedRoles]);
+  }, [role, token, router, allowedRoles, isLoading]);
+
+   if (isLoading) {
+      return <div>Loading...</div>;
+    }
 
   if (!token || (role && !allowedRoles.includes(role))) {
     return null; // or a loading spinner
