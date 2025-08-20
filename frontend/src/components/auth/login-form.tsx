@@ -50,11 +50,10 @@ export function LoginForm() {
                 }),
             });
 
-            console.log(res);
             if (res.ok) {
                 const data = await res.json();
                 login(data.role, data.token);
-                router.push("/dashboard");
+                router.push(`/${data.role}/dashboard`);
             } else {
                 const errorData = await res.json().catch(() => ({}));
                 setError(errorData.message || "Invalid credentials");
