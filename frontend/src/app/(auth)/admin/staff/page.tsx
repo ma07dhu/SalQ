@@ -51,6 +51,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
 import ProtectedRoute from "@/components/protected-route";
+import { fetchWithAuth } from "@/utils/api";
 
 interface ImportResult {
     successCount: number;
@@ -74,10 +75,11 @@ const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive"
     Relieved: "destructive",
 }
 
-const departments = ["Engineering", "Product", "Design", "HR", "Marketing", "Administration", "Computer Science", "ECE", "EE", "CIVIL", "Mechanical", "MBA", "MCA", "Placement"];
-const statuses = ["Active", "Relieved"];
-
-function EditStaffDialog({ staff, onUpdate }: { staff: Staff, onUpdate: (updatedStaff: Staff) => void }) {
+function EditStaffDialog({ staff, onUpdate, departments }: { 
+    staff: Staff, 
+    onUpdate: (updatedStaff: Staff) => void,
+    departments: string[] 
+}) {
     const [joinedDate, setJoinedDate] = React.useState<Date | undefined>(new Date(staff.joinedDate));
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -210,7 +212,7 @@ function ChangeStatusDialog({ staff, onUpdate }: { staff: Staff, onUpdate: (upda
                                 <SelectValue placeholder="Select a status" />
                             </SelectTrigger>
                             <SelectContent>
-                                {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                {["Active", "Relieved"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
@@ -248,6 +250,9 @@ function ViewHistoryDialog({ staff }: { staff: Staff }) {
 }
 
 export default function StaffManagementPage() {
+    const [departments, setDepartments] = React.useState<string[]>([]);
+    const [statuses] = React.useState(["Active", "Relieved"]);
+    const [isLoading, setIsLoading] = React.useState(true);
     const [joinedDate, setJoinedDate] = React.useState<Date>()
     const [masterStaffList] = React.useState(staffList);
     const [filteredStaff, setFilteredStaff] = React.useState(staffList);
@@ -391,6 +396,35 @@ export default function StaffManagementPage() {
         setFilteredStaff(newFilteredStaff);
     }, [searchQuery, statusFilter, masterStaffList]);
 
+    // Fetch departments on component mount
+    React.useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const response = await fetchWithAuth("http://localhost:8080/api/departments");
+                if (response.ok) {
+                    const data = await response.json();
+                    const newData = ["All", ...data];
+                    setDepartments(newData);
+                } else {
+                    console.error("Failed to fetch departments");
+                    // Fallback to default departments if API fails
+                    setDepartments(["All", "Admin", "CSE", "ECE", "EE", "CIVIL", "MECH", "MBA", "MCA", "P&T"]);
+                }
+            } catch (error) {
+                console.error("Error fetching departments:", error);
+                // Fallback to default departments on error
+                setDepartments(["All", "Admin", "CSE", "ECE", "EE", "CIVIL", "MECH", "MBA", "MCA", "P&T"]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDepartments();
+    }, []);
+
+    if (isLoading) {
+        return <div>Loading departments...</div>; // Or a loading spinner
+    }
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -592,7 +626,7 @@ export default function StaffManagementPage() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <EditStaffDialog staff={staff} onUpdate={handleUpdateStaff} />
+                                        <EditStaffDialog staff={staff} onUpdate={handleUpdateStaff} departments={departments} />
                                         <ViewHistoryDialog staff={staff} />
                                         <ChangeStatusDialog staff={staff} onUpdate={handleUpdateStaff} />
                                     </DropdownMenuContent>
