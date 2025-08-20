@@ -80,52 +80,6 @@ function DepartmentReportCard({
 }) {
   const [selectedDept, setSelectedDept] = React.useState<string>("");
 
-//   const handleDownload = async () => {
-//     try {
-//       if (title === "Monthly Salary Statement") {
-//         // Example: hardcoded month (replace with actual state later)
-// //         const month = "2025-08";
-//
-//         // Call backend API (Spring Boot endpoint)
-//        const token = localStorage.getItem("jwtToken"); // or however you are storing the token
-//
-//        const response = await fetch(
-//          `http://localhost:8080/api/hr/reports/pdf?department=${encodeURIComponent(
-//            selectedDept
-//          )}`,
-//          {
-//            method: "GET",
-//            headers: {
-//              "Authorization": `Bearer ${token}`,  // attach token here
-//              "Content-Type": "application/json"
-//            }
-//          }
-//        );
-//
-//
-//
-//         if (!response.ok) throw new Error("Failed to fetch report");
-//
-//         const blob = await response.blob();
-//         const url = window.URL.createObjectURL(blob);
-//
-//         // Trigger browser download
-//         const a = document.createElement("a");
-//         a.href = url;
-//         a.download = `Monthly_Salary_Statement_${selectedDept || "All"}.pdf`;
-//         document.body.appendChild(a);
-//         a.click();
-//         a.remove();
-//         window.URL.revokeObjectURL(url);
-//       } else {
-//         alert("Download not implemented for this report type yet.");
-//       }
-//     } catch (error) {
-//       console.error("Download error:", error);
-//       alert("Failed to generate report. Please try again.");
-//     }
-//   };
-
 const handleDownload = async () => {
   if (!selectedDept) {
     alert("Please select a department");
@@ -140,16 +94,16 @@ const handleDownload = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/hr/reports/pdf?department=${encodeURIComponent(
-        selectedDept
-      )}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+        `http://localhost:8080/api/hr/reports/pdf?department=${encodeURIComponent
+        (selectedDept)}&sign=true`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
     );
+
 
     if (!response.ok) {
       throw new Error("Failed to fetch report");
