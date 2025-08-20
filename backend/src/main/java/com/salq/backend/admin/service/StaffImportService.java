@@ -1,6 +1,7 @@
 package com.salq.backend.admin.service;
 
 import com.opencsv.CSVReader;
+import com.salq.backend.admin.dto.ImportResult;
 import com.salq.backend.staff.model.Department;
 import com.salq.backend.staff.model.Staff;
 import com.salq.backend.staff.repository.DepartmentRepository;
