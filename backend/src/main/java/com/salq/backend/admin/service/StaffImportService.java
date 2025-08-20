@@ -1,7 +1,10 @@
 package com.salq.backend.admin.service;
 
 import com.opencsv.CSVReader;
+import com.salq.backend.admin.dto.ImportResult;
+import com.salq.backend.staff.model.Department;
 import com.salq.backend.staff.model.Staff;
+import com.salq.backend.staff.repository.DepartmentRepository;
 import com.salq.backend.staff.repository.StaffRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ import java.util.List;
 public class StaffImportService {
 
     private final StaffRepository staffRepository;
+    
+    private final DepartmentRepository departmentRepository;
 
     public ImportResult importStaff(MultipartFile file) {
         List<String> errors = new ArrayList<>();
@@ -34,10 +39,13 @@ public class StaffImportService {
             // Skip header row
             for (int i = 1; i < rows.size(); i++) {
                 String[] row = rows.get(i);
+                String deptName = row[1].trim();
                 try {
+                    Department department = departmentRepository.findByDeptName(deptName)
+                            .orElseThrow(() -> new RuntimeException("Department not found: " + deptName));
                     Staff staff = new Staff();
                     staff.setName(row[0].trim());
-                    staff.setDept(row[1].trim());
+                    staff.setDepartment(department);
                     staff.setDesignation(row[2].trim());
                     staff.setPhone(row[3].trim());
                     staff.setEmail(row[4].trim());
@@ -56,7 +64,7 @@ public class StaffImportService {
                     staffRepository.save(staff);
                     successCount++;
                 } catch (Exception e) {
-                    errors.add("Row " + (i + 1) + ": " + e.getMessage());
+                    errors.add("Row " + (i + 1) + " could not be processed: " + e.getMessage());
                 }
             }
         } catch (Exception e) {

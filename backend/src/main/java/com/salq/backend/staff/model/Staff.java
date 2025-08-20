@@ -15,14 +15,18 @@ public class Staff {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sid;
 
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)   // Many staff can belong to one department
+    @JoinColumn(name = "dept_id", referencedColumnName = "dept_id")
+    private Department department;
 
-    private String dept;
+    @Column(name = "sname", nullable = false, length = 150)
+    private String name;
 
     private String designation;
 
     private String phone;
 
+    @Column(unique = true, length = 150)
     private String email;
 
     private String address;
