@@ -3,6 +3,9 @@ package com.salq.backend.staff.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.salq.backend.auth.model.User;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +37,9 @@ public class Staff {
     @ManyToOne(fetch = FetchType.LAZY)   // Many staff can belong to one department
     @JoinColumn(name = "dept_id", referencedColumnName = "dept_id")
     private Department department;
+
+    @OneToOne(mappedBy = "staff", cascade = CascadeType.ALL, orphanRemoval = true)
+    private User user;
 
     @Column(name = "sname", nullable = false, length = 150)
     private String name;

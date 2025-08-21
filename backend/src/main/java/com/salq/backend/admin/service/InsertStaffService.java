@@ -1,8 +1,18 @@
 package com.salq.backend.admin.service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Collections;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.salq.backend.admin.dto.InsertStaffDTO;
+import com.salq.backend.auth.model.Role;
+import com.salq.backend.auth.model.User;
+import com.salq.backend.auth.repository.RoleRepository;
+import com.salq.backend.auth.repository.UserRepository;
+import com.salq.backend.common.service.MailService;
 import com.salq.backend.staff.model.Department;
 import com.salq.backend.staff.model.Staff;
 import com.salq.backend.staff.repository.DepartmentRepository;
@@ -16,27 +26,78 @@ public class InsertStaffService {
 
     private final StaffRepository staffRepository;
     private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;        // Inject RoleRepository
+    private final PasswordEncoder passwordEncoder;      // BCrypt encoder bean
+    private final MailService mailService;              // Service to send emails
+
+    private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
 
     public Staff addStaff(InsertStaffDTO dto) {
+
         Staff staff = new Staff();
+        // Step 1: Save Staff
+        Department department = departmentRepository.findById(dto.getDepartmentId()) 
+        .orElseThrow(() -> new RuntimeException("Department not found with id " + dto.getDepartmentId())); 
 
-        // link department correctly
-        Department department = departmentRepository.findById(dto.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found with id " + dto.getDepartmentId()));
-        staff.setDepartment(department);
-
-        staff.setName(dto.getName());
+        staff.setDepartment(department); 
+        staff.setName(dto.getName()); 
         staff.setDesignation(dto.getDesignation());
-        staff.setPhone(dto.getPhone());
-        staff.setEmail(dto.getEmail());
-        staff.setAddress(dto.getAddress());
+        staff.setPhone(dto.getPhone()); 
+        staff.setEmail(dto.getEmail()); 
+        staff.setAddress(dto.getAddress()); 
         staff.setJoiningDate(dto.getJoiningDate());
-        staff.setRelievingDate(dto.getRelievingDate());
-        staff.setBasicPay(dto.getBasicPay());
+        staff.setRelievingDate(dto.getRelievingDate()); 
+        staff.setBasicPay(dto.getBasicPay()); 
         staff.setAnniversaryBonus(dto.getAnniversaryBonus());
-        staff.setStatus(dto.getStatus());
+        staff.setStatus(dto.getStatus()); 
         staff.setAccNo(dto.getAccNo());
 
-        return staffRepository.save(staff);
+        Staff savedStaff = staffRepository.save(staff);
+
+         if (savedStaff.getEmail() != null && savedStaff.getEmail().endsWith("@gmail.com")) {
+
+                // Step 2: Create User with default credentials
+                String defaultPassword = generateDefaultPassword(8);
+                
+                User user = new User();
+                user.setStaff(savedStaff);
+                user.setEmail(savedStaff.getEmail());
+                user.setPasswordHash(passwordEncoder.encode(defaultPassword));
+                user.setCreatedAt(LocalDateTime.now());
+                user.setLastPasswordChange(null);
+
+                // Fetch STAFF role from DB
+                Role staffRole = roleRepository.findByRoleName("EMPLOYEE")
+                        .orElseThrow(() -> new RuntimeException("STAFF role not found"));
+                user.setRoles(Collections.singleton(staffRole));
+
+
+                
+                // Link user → staff (bidirectional consistency)
+                savedStaff.setUser(user);
+
+                userRepository.save(user);
+
+                try {
+                    mailService.sendWelcomeEmail(savedStaff.getEmail(), savedStaff.getName(), defaultPassword);
+                } catch (Exception e) {
+                    // Log the error but don't stop staff creation
+                    System.err.println("Failed to send welcome email to " + savedStaff.getEmail() + ": " + e.getMessage());
+                }
+            }
+        return savedStaff;
     }
+
+    private String generateDefaultPassword(int length) {
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(PASSWORD_CHARS.length());
+            sb.append(PASSWORD_CHARS.charAt(index));
+        }
+        return sb.toString();
+    
+}
+
 }

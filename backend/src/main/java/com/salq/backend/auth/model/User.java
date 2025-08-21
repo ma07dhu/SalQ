@@ -1,9 +1,22 @@
 package com.salq.backend.auth.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.salq.backend.staff.model.Staff;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -14,8 +27,10 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "staff_id")
-    private Integer staffId;
+    // Proper One-to-One mapping with Staff
+    @OneToOne
+    @JoinColumn(name = "staff_id", referencedColumnName = "sid")
+    private Staff staff;
 
     @Column(nullable = false, unique = true, length = 150)
     private String email;
@@ -29,23 +44,22 @@ public class User {
     @Column(name = "last_password_change")
     private LocalDateTime lastPasswordChange;
 
-    // THIS IS THE KEY PART: Add roles relationship
+    // User ↔ Role many-to-many mapping
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_roles", // join table
-        joinColumns = @JoinColumn(name = "user_id"), // foreign key to users
-        inverseJoinColumns = @JoinColumn(name = "role_id") // foreign key to roles
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
-    public Set<Role> getRoles() { return roles; }
-    public void setRoles(Set<Role> roles) { this.roles = roles; }
+    // --- Getters & Setters ---
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
-    public Integer getStaffId() { return staffId; }
-    public void setStaffId(Integer staffId) { this.staffId = staffId; }
+    public Staff getStaff() { return staff; }
+    public void setStaff(Staff staff) { this.staff = staff; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -59,4 +73,6 @@ public class User {
     public LocalDateTime getLastPasswordChange() { return lastPasswordChange; }
     public void setLastPasswordChange(LocalDateTime lastPasswordChange) { this.lastPasswordChange = lastPasswordChange; }
 
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
 }
