@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StaffController {
 
 
-    @GetMapping("/dashboard")
+    @GetMapping("dashboard")
     public String dashboard() {
         return "Welcome, Staff!";
     }
