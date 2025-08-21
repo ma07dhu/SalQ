@@ -397,8 +397,8 @@ export default function SalaryConfigurationPage() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                name: earning.componentName,
-                type: earning.valueType,
+                componentName: earning.componentName,
+                valueType: earning.valueType,
                 value: earning.value,
                 componentType: 'Earning',
                 effectiveFrom: earning.effectiveFrom
@@ -412,8 +412,8 @@ export default function SalaryConfigurationPage() {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                name: earning.componentName,
-                type: earning.valueType,
+                componentName: earning.componentName,
+                valueType: earning.valueType,
                 value: earning.value,
                 effectiveFrom: earning.effectiveFrom
               })
@@ -435,8 +435,52 @@ export default function SalaryConfigurationPage() {
         );
       }
 
-      // Process deductions (similar to earnings)
-      // ... (similar implementation for deductions)
+      // Process deductions
+      for (const deduction of deductions) {
+        if (deduction.isNew) {
+          // New deduction - POST request
+          updates.push(
+            fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/salary-components`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                componentName: deduction.componentName,
+                valueType: deduction.valueType,
+                value: deduction.value,
+                componentType: 'Deduction',
+                effectiveFrom: deduction.effectiveFrom
+              })
+            })
+          );
+        } else if (deduction.isModified) {
+          // Update existing deduction - PUT request
+          updates.push(
+            fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/salary-components/${deduction.componentId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                componentName: deduction.componentName,
+                valueType: deduction.valueType,
+                value: deduction.value,
+                effectiveFrom: deduction.effectiveFrom
+              })
+            })
+          );
+        }
+      }
+      
+      // Process deletions for deductions
+      const deletedDeductions = originalData.deductions.filter(
+        od => !deductions.some(d => d.componentId === od.componentId)
+      );
+      
+      for (const deleted of deletedDeductions) {
+        updates.push(
+          fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/salary-components/${deleted.componentId}`, {
+            method: 'DELETE'
+          })
+        );
+      }
 
       // Wait for all API calls to complete
       await Promise.all(updates);
