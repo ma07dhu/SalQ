@@ -1,20 +1,16 @@
 package com.salq.backend.admin.service;
 
 import com.salq.backend.admin.dto.SalaryProcessRequest;
-import com.salq.backend.admin.model.SalaryTransaction;
-import com.salq.backend.admin.model.SalaryDetail;
-import com.salq.backend.salary.model.SalaryComponent;
-import com.salq.backend.salary.repository.SalaryTransactionRepository;
-import com.salq.backend.salary.repository.SalaryDetailRepository;
-import com.salq.backend.salary.repository.SalaryComponentRepository;
+import com.salq.backend.admin.model.*;
+import com.salq.backend.admin.repository.*;
+import com.salq.backend.staff.model.Staff;
 import com.salq.backend.staff.repository.StaffRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -28,48 +24,51 @@ public class SalaryProcessingService {
 
     @Transactional
     public void processMonthlyTransactions(SalaryProcessRequest request) {
+        String payrollPeriod = request.getYear() + "-" + String.format("%02d", request.getMonth());
         LocalDate today = LocalDate.now();
-        YearMonth payrollPeriod = YearMonth.of(request.getYear(), request.getMonth());
 
-        // fetch all active components
-        List<SalaryComponent> activeComponents = componentRepo.findActiveComponents(today);
+        // Fetch all active salary components
+        List<SalaryComponents> activeComponents =
+                componentRepo.findByEffectiveFromLessThanEqualAndEffectiveToIsNullOrEffectiveToGreaterThanEqual(today, today);
 
         for (SalaryProcessRequest.EmployeeSalaryData empData : request.getEmployeeData()) {
-            // 1. Insert into salary_transactions
+            Staff staff = staffRepo.findById(empData.getEmployeeId())
+                    .orElseThrow(() -> new RuntimeException("Staff not found: " + empData.getEmployeeId()));
+
+            // Insert into salary_transactions
             SalaryTransaction transaction = new SalaryTransaction();
-            transaction.setStaff(staffRepo.findById(empData.getEmployeeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid staff ID: " + empData.getEmployeeId())));
-            transaction.setPayrollPeriod(payrollPeriod.toString()); // e.g., "2025-08"
+            transaction.setStaff(staff);
+            transaction.setPayrollPeriod(payrollPeriod);
             transaction.setLop(empData.getLop());
-            transaction.setIncomeTax(BigDecimal.valueOf(empData.getOtherDeductions())); // treat as IncomeTax or extra deduction
-            transactionRepo.save(transaction);
+            transaction.setIncomeTax(empData.getIncomeTax());
+            transaction.setOtherDeductions(empData.getOtherDeductions()); 
+            transaction.setFinalised(true);
+            
 
-            // 2. Compute salary details
-            for (SalaryComponent component : activeComponents) {
-                BigDecimal baseSalary = transaction.getStaff().getBasicPay();
+            transaction = transactionRepo.save(transaction);
 
+
+
+            BigDecimal basicPay = staff.getBasicPay();
+
+            for (SalaryComponents comp : activeComponents) {
                 BigDecimal amount;
-                if (component.getValueType().equalsIgnoreCase("Percentage")) {
-                    amount = baseSalary.multiply(component.getValue().divide(BigDecimal.valueOf(100)));
+                if ("Fixed".equalsIgnoreCase(comp.getValueType())) {
+                    amount = comp.getValue();
                 } else {
-                    amount = component.getValue();
+                    amount = basicPay.multiply(comp.getValue()).divide(BigDecimal.valueOf(100));
                 }
 
-                // Apply LOP reduction (simplified: lop days * daily salary)
-                if (empData.getLop() > 0) {
-                    BigDecimal dailySalary = baseSalary.divide(BigDecimal.valueOf(30), BigDecimal.ROUND_HALF_UP);
-                    amount = amount.subtract(dailySalary.multiply(BigDecimal.valueOf(empData.getLop())));
-                }
-
-                // Insert into salary_details
                 SalaryDetail detail = new SalaryDetail();
                 detail.setTransaction(transaction);
-                detail.setComponentName(component.getComponentName());
-                detail.setComponentType(component.getComponentType());
-                detail.setValueType(component.getValueType());
-                detail.setAmount(amount.max(BigDecimal.ZERO)); // prevent negative
+                detail.setComponentName(comp.getComponentName());
+                detail.setComponentType(comp.getComponentType());
+                detail.setValueType(comp.getValueType());
+                detail.setAmount(amount);
                 detailRepo.save(detail);
+                
             }
+
         }
     }
 }

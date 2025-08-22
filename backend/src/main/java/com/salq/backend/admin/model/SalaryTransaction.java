@@ -2,8 +2,10 @@ package com.salq.backend.admin.model;
 
 import com.salq.backend.staff.model.Staff;
 import jakarta.persistence.*;
+import lombok.Data;
 import java.math.BigDecimal;
 
+@Data
 @Entity
 @Table(name = "salary_transactions")
 public class SalaryTransaction {
@@ -12,38 +14,23 @@ public class SalaryTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)  // each transaction belongs to one staff
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id", nullable = false)
     private Staff staff;
 
-    @Column(name = "payroll_period", length = 7)
-    private String payrollPeriod;
+    @Column(name = "payroll_period", nullable = false, length = 7)
+    private String payrollPeriod; // format YYYY-MM
 
-    @Column(name = "isFinalised", nullable = false)
-    private Boolean isFinalised = true;
+    @Column(name = "is_finalised", nullable = false)
+    private boolean isFinalised = false;
 
-    @Column(name = "LOP")
+    @Column(name = "lop")
     private Integer lop;
 
-    @Column(name = "Income_Tax", precision = 12, scale = 2)
+    @Column(name = "income_tax", precision = 12, scale = 2)
     private BigDecimal incomeTax;
+       
+    @Column(name = "other_deductions", precision = 12, scale = 2)
+    private BigDecimal otherDeductions;
 
-    // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Staff getStaff() { return staff; }
-    public void setStaff(Staff staff) { this.staff = staff; }
-
-    public String getPayrollPeriod() { return payrollPeriod; }
-    public void setPayrollPeriod(String payrollPeriod) { this.payrollPeriod = payrollPeriod; }
-
-    public Boolean getIsFinalised() { return isFinalised; }
-    public void setIsFinalised(Boolean isFinalised) { this.isFinalised = isFinalised; }
-
-    public Integer getLop() { return lop; }
-    public void setLop(Integer lop) { this.lop = lop; }
-
-    public BigDecimal getIncomeTax() { return incomeTax; }
-    public void setIncomeTax(BigDecimal incomeTax) { this.incomeTax = incomeTax; }
 }

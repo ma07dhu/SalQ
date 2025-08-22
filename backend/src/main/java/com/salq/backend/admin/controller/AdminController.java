@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.salq.backend.admin.dto.ImportResult;
 import com.salq.backend.admin.dto.SalaryProcessRequest;
 import com.salq.backend.admin.dto.StaffSummaryDto;
+import com.salq.backend.admin.service.SalaryProcessingService;
 import com.salq.backend.admin.service.StaffImportService;
 import com.salq.backend.admin.service.StaffQueryService;
 
@@ -30,8 +31,9 @@ public class AdminController {
     private final StaffImportService staffImportService;
 
     private final StaffQueryService staffQueryService;
-    
+
     private final SalaryProcessingService salaryProcessingService;
+    
 
 
     @GetMapping("dashboard")
@@ -53,10 +55,12 @@ public class AdminController {
         return ResponseEntity.ok(staff);
     }
 
-    @PostMapping("salary-transactions/process-monthly-transactions")
+
+    @PostMapping("/salary-transactions/process-monthly-transactions")
     public ResponseEntity<String> processMonthlyTransactions(@RequestBody SalaryProcessRequest request) {
         salaryProcessingService.processMonthlyTransactions(request);
-        return ResponseEntity.ok("Salary transactions processed successfully");
+        return ResponseEntity.ok("Processed salaries for " + request.getEmployeeData().size() +
+                " employees for " + request.getYear() + "-" + request.getMonth());
     }
 
 }

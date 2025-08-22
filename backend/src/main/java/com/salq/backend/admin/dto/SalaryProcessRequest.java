@@ -2,6 +2,7 @@ package com.salq.backend.admin.dto;
 
 import lombok.Data;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Data
 public class SalaryProcessRequest {
@@ -12,7 +13,8 @@ public class SalaryProcessRequest {
     @Data
     public static class EmployeeSalaryData {
         private Long employeeId;
-        private int lop;
-        private double otherDeductions;
+        private Integer lop;
+        private BigDecimal otherDeductions;
+        private BigDecimal incomeTax;
     }
 }
