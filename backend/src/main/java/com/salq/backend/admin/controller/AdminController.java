@@ -1,31 +1,67 @@
 package com.salq.backend.admin.controller;
 
-import java.io.OutputStream;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-import com.salq.backend.config.PdfSigningUtil;
-import com.salq.backend.hr.controller.ReportService; // ✅ Reuse same ReportService
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-//import com.salq.backend.admin.dto.ImportResult;
+import com.salq.backend.admin.dto.ImportResult;
+import com.salq.backend.admin.dto.SalaryProcessRequest;
+import com.salq.backend.admin.dto.StaffSummaryDto;
+import com.salq.backend.admin.service.SalaryProcessingService;
 import com.salq.backend.admin.service.StaffImportService;
+import com.salq.backend.admin.service.StaffQueryService;
+
+import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = "http://localhost:9002")
 @RequiredArgsConstructor
 public class AdminController {
 
     private final StaffImportService staffImportService;
-    private final ReportService reportService; // ✅ Shared service with HR
+
+    private final StaffQueryService staffQueryService;
+
+    private final SalaryProcessingService salaryProcessingService;
+
+
 
     @GetMapping("dashboard")
     public String dashboard() {
         return "Welcome, Admin!";
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<ImportResult> importStaff(@RequestParam("file") MultipartFile file) {
+        ImportResult result = staffImportService.importStaff(file);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/is-staff-active-before")
+    public ResponseEntity<List<StaffSummaryDto>> getActiveStaffBefore(
+            @RequestParam("beforeDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate beforeDate) {
+
+        List<StaffSummaryDto> staff = staffQueryService.getActiveStaffBefore(beforeDate);
+        return ResponseEntity.ok(staff);
+    }
+
+
+    @PostMapping("/salary-transactions/process-monthly-transactions")
+    public ResponseEntity<String> processMonthlyTransactions(@RequestBody SalaryProcessRequest request) {
+        salaryProcessingService.processMonthlyTransactions(request);
+        return ResponseEntity.ok("Processed salaries for " + request.getEmployeeData().size() +
+                " employees for " + request.getYear() + "-" + request.getMonth());
     }
 
 }

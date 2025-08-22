@@ -1,4 +1,4 @@
-package com.salq.backend.admin.service;
+package com.salq.backend.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
