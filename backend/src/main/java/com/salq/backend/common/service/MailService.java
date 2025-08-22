@@ -22,20 +22,16 @@ public class MailService {
     public void sendWelcomeEmail(String toEmail, String staffName, String defaultPassword) {
         String subject = "Welcome to Company! Your Account Credentials";
         String message = String.format("""
-                                       Hello %s,
-                                       
-                                       Your staff account has been created successfully.
-                                       Here are your login credentials:
-                                       
-                                       Email: %s
-                                       Password: %s
-                                       
-                                       Please login and change your password immediately.
-                                       
-                                       Best regards,
-                                       Admin Team""",
-                staffName, toEmail, defaultPassword
-        );
+                Hello %s,
+                Your staff account has been created successfully.
+                Here are your login credentials:
+                Email: %s
+                Password: %s
+                Please login and change your password immediately.
+
+                Best regards,
+                Admin Team""",
+                staffName, toEmail, defaultPassword);
 
         sendEmail(toEmail, subject, message);
     }
@@ -48,7 +44,6 @@ public class MailService {
         mailMessage.setTo(toEmail);
         mailMessage.setSubject(subject);
         mailMessage.setText(message);
-
         mailSender.send(mailMessage);
     }
 }
