@@ -27,7 +27,7 @@ import com.salq.backend.admin.dto.SalaryProcessRequest;
 import com.salq.backend.admin.dto.StaffSummaryDto;
 import com.salq.backend.admin.model.SalaryComponents;
 import com.salq.backend.admin.service.InsertStaffService;
-import com.salq.backend.admin.service.ReportService;
+import com.salq.backend.admin.service.ReportServices;
 import com.salq.backend.admin.service.SalaryComponentService;
 import com.salq.backend.admin.service.SalaryProcessingService;
 import com.salq.backend.admin.service.StaffImportService;
@@ -51,7 +51,7 @@ public class AdminController {
 
     private final StaffQueryService staffQueryService;
     private final SalaryProcessingService salaryProcessingService;
-    private final ReportService reportService;
+    private final ReportServices reportService;
 
     @GetMapping("dashboard")
     public String greet() {
