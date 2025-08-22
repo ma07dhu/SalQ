@@ -21,7 +21,7 @@ public class StaffController {
     @Autowired
     private StaffRepository staffRepository;
 
-    @GetMapping("/dashboard")
+    @GetMapping("dashboard")
     public String dashboard() {
         return "Welcome, Staff!";
     }

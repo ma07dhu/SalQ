@@ -303,7 +303,7 @@ export default function StaffManagementPage() {
         setImportResult(null);
     
         try {
-            const response = await fetch('http://localhost:8080/api/admin/import', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/import`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -313,14 +313,12 @@ export default function StaffManagementPage() {
     
             const result = await response.json();
             
-            // Close the import dialog first
             const dialog = document.getElementById('import-dialog')?.closest('[role="dialog"]') as HTMLElement;
             if (dialog) {
                 const closeButton = dialog.querySelector('button[data-radix-dropdown-menu-trigger]') as HTMLButtonElement;
                 closeButton?.click();
             }
     
-            // Then show the result
             if (!response.ok) {
                 const errorMessage = result.message || 'Failed to import staff';
                 const errorDetails = result.errors ? (
@@ -400,7 +398,7 @@ export default function StaffManagementPage() {
     React.useEffect(() => {
         const fetchDepartments = async () => {
             try {
-                const response = await fetchWithAuth("http://localhost:8080/api/departments");
+                const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/departments`);
                 if (response.ok) {
                     const data = await response.json();
                     const newData = ["All", ...data];
