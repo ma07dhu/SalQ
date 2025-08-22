@@ -48,7 +48,7 @@ export function AppSidebar() {
       icon: <Wallet />,
       subLinks: [
         { href: "/admin/salary/configuration", text: "Configuration" },
-        { href: "/admin/salary/processing", text: "Processing" },
+        // { href: "/admin/salary/processing", text: "Processing" },
       ]
     },
     { href: "/admin/reports", icon: <FileText />, text: "Reports" },
