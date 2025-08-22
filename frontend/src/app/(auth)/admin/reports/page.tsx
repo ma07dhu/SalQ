@@ -147,7 +147,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
       }
 
       // Then, trigger report generation
-      const reportResponse = await fetch(
+      const reportResponse = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/reports/generate-monthly?year=${year}&month=${month}`,
         { method: 'POST' }
       );
