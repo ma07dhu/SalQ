@@ -1,15 +1,24 @@
 package com.salq.backend.admin.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.salq.backend.admin.dto.ImportResult;
+import com.salq.backend.admin.dto.SalaryProcessRequest;
+import com.salq.backend.admin.dto.StaffSummaryDto;
+import com.salq.backend.admin.service.SalaryProcessingService;
 import com.salq.backend.admin.service.StaffImportService;
+import com.salq.backend.admin.service.StaffQueryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +30,12 @@ public class AdminController {
 
     private final StaffImportService staffImportService;
 
+    private final StaffQueryService staffQueryService;
+
+    private final SalaryProcessingService salaryProcessingService;
+    
+
+
     @GetMapping("dashboard")
     public String dashboard() {
         return "Welcome, Admin!";
@@ -31,4 +46,21 @@ public class AdminController {
         ImportResult result = staffImportService.importStaff(file);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/is-staff-active-before")
+    public ResponseEntity<List<StaffSummaryDto>> getActiveStaffBefore(
+            @RequestParam("beforeDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate beforeDate) {
+
+        List<StaffSummaryDto> staff = staffQueryService.getActiveStaffBefore(beforeDate);
+        return ResponseEntity.ok(staff);
+    }
+
+
+    @PostMapping("/salary-transactions/process-monthly-transactions")
+    public ResponseEntity<String> processMonthlyTransactions(@RequestBody SalaryProcessRequest request) {
+        salaryProcessingService.processMonthlyTransactions(request);
+        return ResponseEntity.ok("Processed salaries for " + request.getEmployeeData().size() +
+                " employees for " + request.getYear() + "-" + request.getMonth());
+    }
+
 }
