@@ -31,7 +31,7 @@ public class SalaryComponentArchiverService {
         this.salaryComponentHistoryRepository = salaryComponentHistoryRepository;
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
+    @Scheduled(cron = "*/10 * * * * *") // Runs daily at midnight
     @Transactional
     public void archiveExpiredSalaryComponents() {
         logger.info("Starting archival of expired salary components...");
