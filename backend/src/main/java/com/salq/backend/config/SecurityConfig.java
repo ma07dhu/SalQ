@@ -1,6 +1,7 @@
 package com.salq.backend.config;
 
-import com.salq.backend.auth.service.JwtAuthenticationFilter;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,16 +12,17 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.salq.backend.auth.service.JwtAuthenticationFilter;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -40,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll() // Allow error endpoint
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/hr/**").hasRole("HR")
-                        .requestMatchers("/api/staff/**").hasRole("STAFF")
+                        .requestMatchers("/api/staff/**").hasAnyRole("STAFF", "EMPLOYEE")
                         .anyRequest().authenticated() // All others require authentication
                 )
                 .exceptionHandling(exceptions -> exceptions
