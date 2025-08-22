@@ -35,16 +35,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        System.out.println("=== JWT Filter Debug ===");
-        System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Auth Header: " + authHeader);
+//        System.out.println("=== JWT Filter Debug ===");
+//        System.out.println("Request URI: " + request.getRequestURI());
+//        System.out.println("Auth Header: " + authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             System.out.println("Token extracted: " + token.substring(0, Math.min(20, token.length())) + "...");
             try {
                 username = jwtUtil.extractUsername(token);
-                System.out.println("Username extracted: " + username);
+//                System.out.println("Username extracted: " + username);
             } catch (Exception e) {
                 System.out.println("JWT extraction failed: " + e.getMessage());
             }
@@ -85,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("No username found - request will be anonymous");
         }
 
-        System.out.println("=== End JWT Filter Debug ===");
+//        System.out.println("=== End JWT Filter Debug ===");
         filterChain.doFilter(request, response);
     }
 }

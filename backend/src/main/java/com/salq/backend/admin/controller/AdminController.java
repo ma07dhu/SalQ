@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = "http://localhost:9002")
 @RequiredArgsConstructor
 public class AdminController {
 
@@ -33,7 +34,7 @@ public class AdminController {
     private final StaffQueryService staffQueryService;
 
     private final SalaryProcessingService salaryProcessingService;
-    
+
 
 
     @GetMapping("dashboard")

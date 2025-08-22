@@ -75,17 +75,17 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
     try {
       const year = selectedMonth.getFullYear();
       const month = selectedMonth.getMonth() + 1; // JavaScript months are 0-indexed
-      
+
       // Format the first day of the selected month for the API query
       const firstDayOfMonth = new Date(year, month - 1, 1);
-      
+
       const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/is-staff-active-before?beforeDate=${firstDayOfMonth.toISOString()}`
       );
       if (!response.ok) {
         throw new Error('Failed to fetch employee data');
       }
-      
+
       const data = await response.json();
       setEmployees(data.map((emp: any) => ({
         id: emp.id,
@@ -106,7 +106,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
 
   // Handle form field changes
   const handleInputChange = (id: string, field: 'lop' | 'otherDeductions' | 'incomeTax', value: number) => {
-    setEmployees(employees.map(emp => 
+    setEmployees(employees.map(emp =>
       emp.id === id ? { ...emp, [field]: Number(value) || 0 } : emp
     ));
   };
@@ -116,11 +116,11 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       const year = selectedMonth.getFullYear();
       const month = selectedMonth.getMonth() + 1;
-      
+
       // First, update the salary transactions with LOP and deductions
       const updateResponse = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/salary-transactions/process-monthly-transactions`,
@@ -139,24 +139,24 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
           })
         }
       );
-      
+
       if (!updateResponse.ok) {
         throw new Error('Failed to update salary data');
       }else{
         console.log("Updated the records!");
       }
-      
+
       // Then, trigger report generation
       const reportResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/reports/generate-monthly?year=${year}&month=${month}`,
         { method: 'POST' }
       );
-      
+
       if (!reportResponse.ok) {
         throw new Error('Failed to generate report');
       }
-      
-      // TO BE MODIFIED BY THE ACCORDING TO REPORT GENERATION LOGIC !!!!!!!!!!!!!!!!!!!!!!!!!  
+
+      // TO BE MODIFIED BY THE ACCORDING TO REPORT GENERATION LOGIC !!!!!!!!!!!!!!!!!!!!!!!!!
       // Get the report file
       const blob = await reportResponse.blob();
       const url = window.URL.createObjectURL(blob);
@@ -167,7 +167,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-      
+
       onReportGenerated();
       onOpenChange(false);
     } catch (err) {
@@ -194,7 +194,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
             Review and update employee salary details for the selected month.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="flex items-center gap-4 mb-4">
           <Label htmlFor="month" className="whitespace-nowrap">
             Select Month:
@@ -222,7 +222,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
               />
             </PopoverContent>
           </Popover>
-          <Button 
+          <Button
             onClick={fetchEmployeeData}
             disabled={isLoading}
             variant="outline"
@@ -231,14 +231,14 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
             {isLoading ? 'Loading...' : 'Refresh'}
           </Button>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
             <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{error}</span>
           </div>
         )}
-        
+
         <div className="flex-1 overflow-y-auto border rounded-lg">
           <form onSubmit={handleSubmit} className="divide-y">
           <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 font-medium">
@@ -249,7 +249,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
             <div className="col-span-2 text-left">Income Tax (₹)</div>
             <div className="col-span-2"></div>
         </div>
-            
+
             {isLoading ? (
               <div className="flex justify-center items-center p-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -326,7 +326,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
                 ))}
               </div>
             )}
-            
+
             <div className="p-4 bg-gray-50 border-t">
               <div className="flex justify-between items-center">
                 <Button
@@ -345,8 +345,8 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
                 >
                   Reset All
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isLoading || isSubmitting || employees.length === 0}
                 >
                   {isSubmitting ? (
@@ -375,7 +375,7 @@ function MonthlyReportDialog({ open, onOpenChange, onReportGenerated }: MonthlyR
 
 function DepartmentReportCard({ title, description, icon }: { title: string, description: string, icon: React.ReactNode }) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  
+
   if (title === "Monthly Salary Statement") {
     return (
       <Card className="flex flex-col">
@@ -391,16 +391,16 @@ function DepartmentReportCard({ title, description, icon }: { title: string, des
           </div>
         </CardHeader>
         <CardContent>
-          <MonthlyReportDialog 
-            open={isDialogOpen} 
+          <MonthlyReportDialog
+            open={isDialogOpen}
             onOpenChange={setIsDialogOpen}
             onReportGenerated={() => {
               // You can add a toast notification here if needed
               console.log('Report generated successfully');
             }}
           />
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             onClick={() => setIsDialogOpen(true)}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -410,7 +410,7 @@ function DepartmentReportCard({ title, description, icon }: { title: string, des
       </Card>
     );
   }
-  
+
   // Original implementation for other report types
   return (
     <Card className="flex flex-col">
