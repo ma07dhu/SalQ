@@ -7,7 +7,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.time.LocalDate;
 import java.util.List;
 
+import java.util.Optional;
+
 public interface SalaryComponentRepository extends JpaRepository<SalaryComponents, Long>, JpaSpecificationExecutor<SalaryComponents> {
+    Optional<SalaryComponents> findTopByComponentNameIgnoreCaseAndEffectiveFromLessThanOrderByEffectiveFromDesc(String componentName, LocalDate effectiveFrom);
     List<SalaryComponents> findByEffectiveFromLessThanEqualAndEffectiveToIsNullOrEffectiveToGreaterThanEqual(
-            LocalDate today, LocalDate today2);
+        LocalDate today, LocalDate today2);
 }
