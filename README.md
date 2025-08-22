@@ -10,6 +10,7 @@ Key features include:
 - Automated salary processing via scheduled background jobs.
 - CSV-based bulk uploads.
 - Dynamic salary reports with filters and custom date range support.
+- Digital signature support for reports.
 - Secure authentication and role-based access control.
 - Email notifications, audit logs, and digital signature support.
 - Responsive UI with accessibility options like font size control.
@@ -42,4 +43,4 @@ Key features include:
    ```
 
 4. Open your browser and visit:  
-   [http://localhost:9000](http://localhost:9000)
+   [http://localhost:9002](http://localhost:9002)

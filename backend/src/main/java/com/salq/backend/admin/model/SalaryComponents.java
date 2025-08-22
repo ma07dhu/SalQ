@@ -47,4 +47,6 @@ public class SalaryComponents {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
 }
