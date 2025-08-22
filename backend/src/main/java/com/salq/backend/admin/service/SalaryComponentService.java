@@ -46,7 +46,18 @@ public class SalaryComponentService {
 
     // POST
     public SalaryComponents createSalaryComponent(SalaryComponents component) {
-        return repository.save(component);
+        SalaryComponents saved = repository.save(component);
+
+        // Find previous component by name (case-insensitive), effective_from < new component's effective_from
+        repository.findTopByComponentNameIgnoreCaseAndEffectiveFromLessThanOrderByEffectiveFromDesc(
+                saved.getComponentName(), saved.getEffectiveFrom()
+        ).ifPresent(prev -> {
+            prev.setEffectiveTo(saved.getEffectiveFrom().minusDays(1));
+            prev.setUpdatedAt(java.time.LocalDateTime.now());
+            repository.save(prev);
+        });
+
+        return saved;
     }
 
     // PUT
@@ -71,9 +82,18 @@ public class SalaryComponentService {
 
     // DELETE
     public void deleteSalaryComponent(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Salary component not found with id " + id);
-        }
+        SalaryComponents toDelete = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Salary component not found with id " + id));
+
+        // Find previous component by name (case-insensitive), effective_from < deleted component's effective_from
+        repository.findTopByComponentNameIgnoreCaseAndEffectiveFromLessThanOrderByEffectiveFromDesc(
+                toDelete.getComponentName(), toDelete.getEffectiveFrom()
+        ).ifPresent(prev -> {
+            prev.setEffectiveTo(null);
+            prev.setUpdatedAt(java.time.LocalDateTime.now());
+            repository.save(prev);
+        });
+
         repository.deleteById(id);
     }
 }
