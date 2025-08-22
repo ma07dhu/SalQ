@@ -51,15 +51,15 @@ public class SalaryComponentArchiverService {
             int insertedRows = insertQuery.executeUpdate();
             logger.info("Inserted {} rows into salary_components_history", insertedRows);
 
-            // Step 2: Delete those archived rows from salary_components
-            String deleteSql = """
-                    DELETE FROM salary_components
-                    WHERE effective_to IS NOT NULL AND effective_to < CURRENT_DATE
-                    """;
-
-            Query deleteQuery = entityManager.createNativeQuery(deleteSql);
-            int deletedRows = deleteQuery.executeUpdate();
-            logger.info("Deleted {} rows from salary_components", deletedRows);
+//            // Step 2: Delete those archived rows from salary_components
+//            String deleteSql = """
+//                    DELETE FROM salary_components
+//                    WHERE effective_to IS NOT NULL AND effective_to < CURRENT_DATE
+//                    """;
+//
+//            Query deleteQuery = entityManager.createNativeQuery(deleteSql);
+//            int deletedRows = deleteQuery.executeUpdate();
+//            logger.info("Deleted {} rows from salary_components", deletedRows);
 
             logger.info("Archival of expired salary components completed successfully.");
 
