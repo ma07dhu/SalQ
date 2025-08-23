@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:9002")
 public class AdminController {
 
     // From HEAD
@@ -58,7 +60,7 @@ public class AdminController {
         return "Welcome, Admin!";
     }
 
-    @PostMapping("/staff/import")
+    @PostMapping("/import")
     public ResponseEntity<ImportResult> importStaff(@RequestParam("file") MultipartFile file) {
         ImportResult result = staffImportService.importStaff(file);
         return ResponseEntity.ok(result);
