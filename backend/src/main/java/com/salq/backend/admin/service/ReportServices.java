@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static org.thymeleaf.util.StringUtils.equalsIgnoreCase;
 
 @Service
-public class ReportService {
+public class ReportServices {
 
     private static final String REPORT_URL = "https://salq.com";
 
@@ -51,7 +51,7 @@ public class ReportService {
     private final SalaryTransactionRepository salaryTransactionRepository;
     private final SalaryDetailRepository salaryDetailRepository;
 
-    public ReportService(SalaryTransactionRepository salaryTransactionRepository,
+    public ReportServices(SalaryTransactionRepository salaryTransactionRepository,
                          SalaryDetailRepository salaryDetailRepository) {
         this.salaryTransactionRepository = salaryTransactionRepository;
         this.salaryDetailRepository = salaryDetailRepository;
