@@ -1,8 +1,9 @@
 package com.salq.backend.admin.dto;
 
-import lombok.Data;
-import java.util.List;
 import java.math.BigDecimal;
+import java.util.List;
+
+import lombok.Data;
 
 @Data
 public class SalaryProcessRequest {

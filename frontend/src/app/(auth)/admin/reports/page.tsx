@@ -35,8 +35,8 @@ import { fetchWithAuth } from "@/utils/api";
 
 const reports = [
     { title: "Monthly Salary Statement", description: "Detailed report of all salaries paid for a selected month.", icon: <FileText className="h-8 w-8 text-primary" /> },
-    { title: "Department-wise Pay", description: "Breakdown of salary expenses across different departments.", icon: <PieChart className="h-8 w-8 text-primary" /> },
-    { title: "Yearly Financial Summary", description: "An overview of payroll expenses for the entire financial year.", icon: <CalendarIcon className="h-8 w-8 text-primary" /> },
+    // { title: "Department-wise Pay", description: "Breakdown of salary expenses across different departments.", icon: <PieChart className="h-8 w-8 text-primary" /> },
+    // { title: "Yearly Financial Summary", description: "An overview of payroll expenses for the entire financial year.", icon: <CalendarIcon className="h-8 w-8 text-primary" /> },
 ];
 
 const departments = ["All", "Administration", "Computer Science", "ECE", "EE", "CIVIL", "Mechanical", "MBA", "MCA", "Placement"];

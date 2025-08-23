@@ -511,85 +511,163 @@ export default function StaffManagementPage() {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Staff</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[480px]">
-                        <DialogHeader>
-                            <DialogTitle>Add New Staff Member</DialogTitle>
-                            <DialogDescription>
-                                Fill in the details below to add a new staff member.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">Full Name</Label>
-                                <Input id="name" className="col-span-3" />
-                            </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="email" className="text-right">Email</Label>
-                                <Input id="email" type="email" className="col-span-3" />
-                            </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="mobile" className="text-right">Mobile Number</Label>
-                                <Input id="mobile" className="col-span-3" />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="department" className="text-right">Department</Label>
-                                <Select>
-                                    <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Select a department" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {departments.map(dep => <SelectItem key={dep} value={dep.toLowerCase().replace(' ', '-')}>{dep}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="designation" className="text-right">Designation</Label>
-                                <Input id="designation" className="col-span-3" />
-                            </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="joined-date" className="text-right">Joined Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            id="joined-date"
-                                            variant={"outline"}
-                                            className={cn(
-                                                "col-span-3 justify-start text-left font-normal",
-                                                !joinedDate && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {joinedDate ? format(joinedDate, "PPP") : <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={joinedDate}
-                                            onSelect={setJoinedDate}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="base-pay" className="text-right">Base Pay</Label>
-                                <Input id="base-pay" type="number" className="col-span-3" />
-                            </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="bank-account" className="text-right">Bank Account No.</Label>
-                                <Input id="bank-account" className="col-span-3" />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" className="w-full sm:w-auto">Add Staff Member</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+               <Dialog>
+  <DialogTrigger asChild>
+    <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Staff</Button>
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-[480px]">
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget as HTMLFormElement;
+        const formData = new FormData(form);
+        const token = getToken();
+
+        const payload = {
+          departmentId: formData.get("departmentId") ? Number(formData.get("departmentId")) : null,
+          name: formData.get("name") || "",
+          designation: formData.get("designation") || "",
+          phone: formData.get("phone") || "",
+          email: formData.get("email") || "",
+          address: formData.get("address") || "",
+          joiningDate: joinedDate ? format(joinedDate, "yyyy-MM-dd") : null,
+          relievingDate: formData.get("relievingDate") || null,
+          basicPay: formData.get("basicPay") ? Number(formData.get("basicPay")) : 0,
+          anniversaryBonus: formData.get("anniversaryBonus") ? Number(formData.get("anniversaryBonus")) : 0,
+          status: formData.get("status") || "Active",
+          accNo: formData.get("accNo") || ""
+        };
+
+        try {
+          const response = await fetch("http://localhost:8080/api/admin/staff", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (response.ok) {
+            const newStaff = await response.json();
+            alert("Staff added successfully!");
+            setFilteredStaff([...filteredStaff, newStaff]);
+          } else {
+            const error = await response.text();
+            alert("Failed to add staff: " + error);
+          }
+        } catch (err) {
+          console.error("Error adding staff:", err);
+          alert("An error occurred while adding staff");
+        }
+      }}
+    >
+      <DialogHeader>
+        <DialogTitle>Add New Staff Member</DialogTitle>
+        <DialogDescription>
+          Fill in the details below to add a new staff member.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">Full Name</Label>
+          <Input id="name" name="name" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="email" className="text-right">Email</Label>
+          <Input id="email" name="email" type="email" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="phone" className="text-right">Phone</Label>
+          <Input id="phone" name="phone" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="address" className="text-right">Address</Label>
+          <Input id="address" name="address" className="col-span-3" />
+        </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="departmentId" className="text-right">Department</Label>
+        <Select name="departmentId" required>
+            <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select a department" />
+            </SelectTrigger>
+            <SelectContent>
+            {departments
+                .filter(dep => dep !== "All") // remove the "All" option
+                .map((dep, index) => (
+                <SelectItem key={index} value={String(index + 1)}>
+                    {dep}
+                </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="designation" className="text-right">Designation</Label>
+          <Input id="designation" name="designation" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="joiningDate" className="text-right">Joining Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="joiningDate"
+                variant={"outline"}
+                className={cn(
+                  "col-span-3 justify-start text-left font-normal",
+                  !joinedDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {joinedDate ? format(joinedDate, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={joinedDate}
+                onSelect={setJoinedDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="relievingDate" className="text-right">Relieving Date</Label>
+          <Input id="relievingDate" name="relievingDate" type="date" className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="basicPay" className="text-right">Basic Pay</Label>
+          <Input id="basicPay" name="basicPay" type="number" className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="anniversaryBonus" className="text-right">Anniversary Bonus</Label>
+          <Input id="anniversaryBonus" name="anniversaryBonus" type="number" className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="accNo" className="text-right">Account No.</Label>
+          <Input id="accNo" name="accNo" className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="status" className="text-right">Status</Label>
+          <Select name="status" defaultValue="Active">
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Relieved">Relieved</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button type="submit" className="w-full sm:w-auto">Add Staff Member</Button>
+      </DialogFooter>
+    </form>
+  </DialogContent>
+</Dialog>
+
             </div>
         </div>
         <div className="rounded-md border">

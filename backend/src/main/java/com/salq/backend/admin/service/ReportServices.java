@@ -1,12 +1,16 @@
 package com.salq.backend.admin.service;
 
-import com.lowagie.text.*;
-import com.lowagie.text.pdf.*;
-import com.salq.backend.admin.model.SalaryDetail;
-import com.salq.backend.admin.model.SalaryTransaction;
-import com.salq.backend.admin.repository.SalaryDetailRepository;
-import com.salq.backend.admin.repository.SalaryTransactionRepository;
-import com.salq.backend.staff.model.Staff;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
@@ -14,19 +18,29 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Service;
-
-import java.awt.Color;
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
-
 import static org.thymeleaf.util.StringUtils.equalsIgnoreCase;
+
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPageEventHelper;
+import com.lowagie.text.pdf.PdfWriter;
+import com.salq.backend.admin.model.SalaryDetail;
+import com.salq.backend.admin.model.SalaryTransaction;
+import com.salq.backend.admin.repository.SalaryDetailRepository;
+import com.salq.backend.admin.repository.SalaryTransactionRepository;
+import com.salq.backend.staff.model.Staff;
 
 @Service
 public class ReportServices {
