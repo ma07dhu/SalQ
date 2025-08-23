@@ -1,70 +1,49 @@
 package com.salq.backend.admin.controller;
 
-<<<<<<< HEAD
-import java.time.YearMonth;
-import com.salq.backend.admin.service.ReportService;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.salq.backend.admin.dto.ImportResult;
-=======
-import com.salq.backend.admin.dto.SalaryComponentUpdateRequest;
-import com.salq.backend.admin.model.SalaryComponents;
-import com.salq.backend.admin.service.SalaryComponentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.time.LocalDate;
-import java.util.List;
-
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
->>>>>>> origin/main
+
+import com.salq.backend.admin.model.SalaryComponents;
+
 import com.salq.backend.admin.dto.SalaryProcessRequest;
+import com.salq.backend.admin.dto.SalaryComponentUpdateRequest;
 import com.salq.backend.admin.dto.StaffSummaryDto;
+
 import com.salq.backend.admin.service.SalaryProcessingService;
-import com.salq.backend.admin.service.StaffQueryService;
-import com.salq.backend.admin.service.ReportService;   // <-- import your ReportService
+import com.salq.backend.admin.service.StaffQueryService; 
+import com.salq.backend.admin.service.SalaryComponentService;
+import com.salq.backend.admin.service.ReportServices;
 
 import lombok.RequiredArgsConstructor;
 
-<<<<<<< HEAD
-import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.time.YearMonth;
 
-=======
->>>>>>> origin/main
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
-<<<<<<< HEAD
-    private final StaffImportService staffImportService;
-=======
     @Autowired
     private SalaryComponentService salaryComponentService;
-
->>>>>>> origin/main
     private final StaffQueryService staffQueryService;
     private final SalaryProcessingService salaryProcessingService;
-<<<<<<< HEAD
-    private final ReportService reportService;   // <-- inject report service
-=======
+    private final ReportServices reportService;  
 
 
->>>>>>> origin/main
 
     @GetMapping("dashboard")
     public String greet(){
@@ -119,7 +98,6 @@ public class AdminController {
                 " employees for " + request.getYear() + "-" + request.getMonth());
     }
 
-    // ✅ NEW: Monthly Salary Report Download
     @PostMapping("/reports/generate-monthly")
     public ResponseEntity<byte[]> generateMonthlyReport(
             @RequestParam int year,
