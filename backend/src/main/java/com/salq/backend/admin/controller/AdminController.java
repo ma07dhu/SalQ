@@ -24,9 +24,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.salq.backend.admin.dto.ImportResult;
 import com.salq.backend.admin.dto.InsertStaffDTO;
 import com.salq.backend.admin.dto.SalaryComponentUpdateRequest;
+
+import com.salq.backend.admin.model.SalaryComponents;
+
 import com.salq.backend.admin.dto.SalaryProcessRequest;
 import com.salq.backend.admin.dto.StaffSummaryDto;
-import com.salq.backend.admin.model.SalaryComponents;
 import com.salq.backend.admin.service.InsertStaffService;
 import com.salq.backend.admin.service.ReportServices;
 import com.salq.backend.admin.service.SalaryComponentService;
@@ -36,6 +38,8 @@ import com.salq.backend.admin.service.StaffQueryService;
 import com.salq.backend.staff.model.Staff;
 
 import lombok.RequiredArgsConstructor;
+
+
 
 @RestController
 @RequestMapping("/api/admin")
@@ -54,6 +58,8 @@ public class AdminController {
     private final StaffQueryService staffQueryService;
     private final SalaryProcessingService salaryProcessingService;
     private final ReportServices reportService;
+
+
 
     @GetMapping("dashboard")
     public String greet() {
@@ -119,7 +125,6 @@ public class AdminController {
                 " employees for " + request.getYear() + "-" + request.getMonth());
     }
 
-    // === Monthly Salary Report (from origin/main) ===
     @PostMapping("/reports/generate-monthly")
     public ResponseEntity<byte[]> generateMonthlyReport(
             @RequestParam int year,
