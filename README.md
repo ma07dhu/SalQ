@@ -29,7 +29,7 @@ Key features include:
 
 2. **Install dependencies**  
    ```bash
-   cd frontend
+   npm install
    ```
 
 3. **Start the development server**  
